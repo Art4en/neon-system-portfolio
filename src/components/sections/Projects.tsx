@@ -11,11 +11,14 @@ import { SectionHeader } from '../ui/SectionHeader';
 import { MissionCard } from './MissionCard';
 import { SocialIcon } from '../ui/Icons';
 
+const DEV = import.meta.env.DEV;
+
 /** 04 — MISSIONS : scroll horizontal épinglé (desktop) / cartes empilées (mobile). */
 export function Projects() {
   const playing = usePlaying();
-  const DEV = import.meta.env.DEV;
-  const projects = content.projects.filter((p) => DEV || isFilled(p.title));
+  // En prod, une mission pas encore remplie s'affiche « verrouillée » (aucun texte inventé).
+  const projects = content.projects;
+  const isLocked = (title: string) => !DEV && !isFilled(title);
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const reduced = useReducedMotion();
   const horizontal = isDesktop && !reduced;
@@ -36,7 +39,8 @@ export function Projects() {
     if (phase !== 'playing') return;
     const check = () => {
       const slug = decodeURIComponent(location.hash.slice(1));
-      if (content.projects.some((p) => p.slug === slug)) setOpenProject(slug);
+      if (content.projects.some((p) => p.slug === slug && (DEV || isFilled(p.title))))
+        setOpenProject(slug);
     };
     check();
     window.addEventListener('hashchange', check);
@@ -125,7 +129,13 @@ export function Projects() {
         </div>
 
         {projects.map((p, i) => (
-          <MissionCard key={p.slug} project={p} index={i} onOpen={open} />
+          <MissionCard
+            key={p.slug}
+            project={p}
+            index={i}
+            onOpen={open}
+            locked={isLocked(p.title)}
+          />
         ))}
 
         <div className="missions__end" aria-hidden={!githubUrl}>

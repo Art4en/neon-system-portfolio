@@ -93,8 +93,8 @@ export function Contact() {
             onSplit: (self) =>
               gsap.from(self.chars, {
                 opacity: 0,
-                scale: 2.4,
-                filter: 'blur(12px)',
+                scale: 2,
+                yPercent: -30,
                 duration: 0.9,
                 ease: 'expo.out',
                 stagger: { each: 0.035, from: 'random' },

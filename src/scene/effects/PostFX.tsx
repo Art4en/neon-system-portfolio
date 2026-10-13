@@ -4,55 +4,43 @@ import {
   Bloom,
   ChromaticAberration,
   EffectComposer,
-  Glitch,
   Noise,
   Scanline,
   Vignette,
 } from '@react-three/postprocessing';
-import {
-  BlendFunction,
-  GlitchMode,
-  type ChromaticAberrationEffect,
-  type GlitchEffect,
-} from 'postprocessing';
-import { Vector2 } from 'three';
+import { BlendFunction, type ChromaticAberrationEffect } from 'postprocessing';
 import type { QualityPreset } from '../quality';
 import { sceneState } from '../sceneState';
 import { useAppStore } from '../../store/useAppStore';
 import { prefersReducedMotion } from '../../lib/env';
 
-const GLITCH_DELAY = new Vector2(3600, 3600); // jamais de glitch « spontané » : on le pilote nous-mêmes
-const GLITCH_DURATION = new Vector2(0.2, 0.35);
-const GLITCH_STRENGTH = new Vector2(0.15, 0.45);
-
 /**
  * Post-processing : bloom sur le néon, aberration chromatique pilotée par la vitesse du scroll,
- * glitch bref aux changements de section / scrolls très rapides, grain, vignette, scanlines.
- * Chaque effet dépend du niveau de qualité.
+ * « glitch » bref aux changements de section (pic de séparation RGB qui tremble), grain,
+ * vignette, scanlines. Chaque effet dépend du niveau de qualité.
+ *
+ * Note : on n'utilise volontairement PAS le GlitchEffect de postprocessing, qui produit des
+ * bandes / écrans noirs sur certains GPU.
  */
 export function PostFX({ preset }: { preset: QualityPreset }) {
   const ca = useRef<ChromaticAberrationEffect>(null);
-  const glitch = useRef<GlitchEffect>(null);
   const glitchUntil = useRef(0);
   const glitchTick = useAppStore((s) => s.glitchTick);
 
   useEffect(() => {
-    if (glitchTick > 0 && !prefersReducedMotion()) glitchUntil.current = performance.now() + 260;
+    if (glitchTick > 0 && !prefersReducedMotion()) glitchUntil.current = performance.now() + 280;
   }, [glitchTick]);
 
   useFrame(() => {
-    if (ca.current) {
-      const k = 0.0005 + Math.min(1.4, sceneState.speed) * 0.0032 + sceneState.rewind * 0.006;
-      ca.current.offset.set(k, k * 0.55);
-    }
-    if (glitch.current) {
-      const on =
-        performance.now() < glitchUntil.current ||
-        sceneState.rewind > 0.5 ||
-        (sceneState.speed > 1.35 && sceneState.motion === 1);
-      const mode = on ? GlitchMode.CONSTANT_WILD : GlitchMode.DISABLED;
-      if (glitch.current.mode !== mode) glitch.current.mode = mode;
-    }
+    if (!ca.current) return;
+    const base = preset.chromatic
+      ? 0.0005 + Math.min(1.2, sceneState.speed) * 0.0022 + sceneState.rewind * 0.005
+      : 0;
+    // Pic de glitch : séparation RGB qui saute d'une image à l'autre, ~0,3 s.
+    const left = glitchUntil.current - performance.now();
+    const pulse =
+      preset.glitch && left > 0 ? (left / 280) * 0.012 * (Math.random() > 0.5 ? 1 : -1) : 0;
+    ca.current.offset.set(base + pulse, base * 0.55 - pulse * 0.4);
   });
 
   return (
@@ -66,19 +54,8 @@ export function PostFX({ preset }: { preset: QualityPreset }) {
           radius={0.7}
         />
       )}
-      {preset.chromatic && (
+      {(preset.chromatic || preset.glitch) && (
         <ChromaticAberration ref={ca} radialModulation modulationOffset={0.15} />
-      )}
-      {preset.glitch && (
-        <Glitch
-          ref={glitch}
-          active
-          mode={GlitchMode.DISABLED}
-          delay={GLITCH_DELAY}
-          duration={GLITCH_DURATION}
-          strength={GLITCH_STRENGTH}
-          ratio={0.9}
-        />
       )}
       {preset.scanlines && (
         <Scanline density={1.6} opacity={0.08} blendFunction={BlendFunction.OVERLAY} />

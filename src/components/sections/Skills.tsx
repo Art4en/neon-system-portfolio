@@ -28,11 +28,9 @@ export function Skills() {
 
 function SkillCards() {
   const playing = usePlaying();
-  const DEV = import.meta.env.DEV;
   const root = useRef<HTMLDivElement>(null);
-  const skills = content.skills
-    .map((s, i) => ({ s, i }))
-    .filter(({ s }) => DEV || isFilled(s.name));
+  // En prod, une compétence pas encore remplie s'affiche « verrouillée ».
+  const skills = content.skills.map((s, i) => ({ s, i }));
 
   useGSAP(
     () => {
@@ -78,10 +76,10 @@ function SkillCards() {
                 <li key={i} className="skill-card" data-anim="skill-card">
                   <div className="flex items-baseline justify-between gap-3 mb-2">
                     <span className="font-mono text-sm uppercase tracking-wide">
-                      <Placeholder value={s.name} field={`skills[${i}].name`} />
+                      <Placeholder value={s.name} field={`skills[${i}].name`} locked="🔒 Locked" />
                     </span>
                     <span className="font-display text-accent text-sm">
-                      <Placeholder value={s.level} field="level">
+                      <Placeholder value={s.level} field="level" locked="??">
                         {(v) => v}
                       </Placeholder>
                     </span>

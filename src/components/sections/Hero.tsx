@@ -30,12 +30,10 @@ export function Hero() {
         gsap.from('[data-hero-in]', {
           y: 30,
           opacity: 0,
-          filter: 'blur(8px)',
           duration: 1.1,
           ease: 'expo.out',
           stagger: 0.09,
           delay: 0.55,
-          clearProps: 'filter',
         });
         // Sortie au scroll : le bloc s'éloigne pendant que la caméra avance.
         gsap.to('[data-hero-fade]', {

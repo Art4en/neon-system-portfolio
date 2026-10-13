@@ -20,7 +20,9 @@ const KIND: Record<TimelineKind, { label: string; Icon: typeof Award }> = {
 export function Timeline() {
   const playing = usePlaying();
   const DEV = import.meta.env.DEV;
-  const steps = content.timeline.filter((t) => DEV || isFilled(t.title));
+  // En prod, une étape pas encore remplie s'affiche comme un succès « verrouillé ».
+  const steps = content.timeline;
+  const isLocked = (title: string) => !DEV && !isFilled(title);
   const root = useRef<HTMLElement>(null);
   const pushToast = useAppStore((s) => s.pushToast);
 
@@ -51,7 +53,7 @@ export function Timeline() {
         gsap.utils.toArray<HTMLElement>('[data-anim="tl-item"]', list).forEach((item, i) => {
           const card = item.querySelector('[data-anim="tl-card"]');
           const fromLeft = item.classList.contains('tl-item--left');
-          gsap.set(card, { opacity: 0, x: fromLeft ? -60 : 60, filter: 'blur(6px)' });
+          gsap.set(card, { opacity: 0, x: fromLeft ? -60 : 60 });
           ScrollTrigger.create({
             trigger: item,
             start: 'top 68%',
@@ -61,12 +63,11 @@ export function Timeline() {
               gsap.to(card, {
                 opacity: 1,
                 x: 0,
-                filter: 'blur(0px)',
                 duration: 1,
                 ease: 'expo.out',
-                clearProps: 'filter',
               });
               const title = steps[i]?.title;
+              if (title !== undefined && isLocked(title)) return;
               pushToast({
                 kind: 'milestone',
                 title: title && isFilled(title) ? title : 'Étape à remplir',
@@ -116,7 +117,7 @@ export function Timeline() {
               return (
                 <li
                   key={i}
-                  className={`tl-item ${i % 2 === 0 ? 'tl-item--left' : 'tl-item--right'}`}
+                  className={`tl-item ${i % 2 === 0 ? 'tl-item--left' : 'tl-item--right'} ${isLocked(step.title) ? 'is-locked' : ''}`}
                   data-anim="tl-item"
                 >
                   <span className="tl-item__node" aria-hidden="true">
@@ -125,16 +126,26 @@ export function Timeline() {
                   <div data-anim="tl-card" className="tl-item__card">
                     <Panel innerClassName="p-5 sm:p-6" brackets={false}>
                       <p className="micro flex items-center justify-between gap-3 mb-2">
-                        <span className="micro-accent">🏆 {label}</span>
+                        <span className="micro-accent">
+                          {isLocked(step.title) ? '🔒' : '🏆'} {label}
+                        </span>
                         <span className="font-mono">
-                          <Placeholder value={step.date} field={`timeline[${i}].date`} />
+                          <Placeholder
+                            value={step.date}
+                            field={`timeline[${i}].date`}
+                            locked="????"
+                          />
                         </span>
                       </p>
                       <h3 className="font-display uppercase tracking-wider text-lg sm:text-xl text-ink">
                         {isFilled(step.title) ? (
                           step.title
                         ) : (
-                          <Placeholder value={step.title} field={`timeline[${i}].title`} />
+                          <Placeholder
+                            value={step.title}
+                            field={`timeline[${i}].title`}
+                            locked="Succès verrouillé"
+                          />
                         )}
                       </h3>
                       <p className="micro mt-1 normal-case tracking-normal text-sm">

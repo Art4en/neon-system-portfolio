@@ -14,7 +14,7 @@ varying float vDist;
 
 void main() {
   vec2 c = vCoord / uCell;
-  vec2 fw = fwidth(c);
+  vec2 fw = max(fwidth(c), vec2(1e-5)); // jamais de division par zéro
   vec2 g = abs(fract(c - 0.5) - 0.5) / fw;
   float line = 1.0 - min(min(g.x, g.y), 1.0);
   // halo doux autour des lignes : c'est lui qui « nourrit » le bloom
@@ -30,5 +30,5 @@ void main() {
 
   float fog = smoothstep(uFogNear, uFogFar, vDist);
   col = mix(col, uFog, fog);
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor = vec4(max(col, vec3(0.0)), 1.0);
 }

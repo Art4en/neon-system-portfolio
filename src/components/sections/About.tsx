@@ -21,7 +21,8 @@ const keep = (v: string | number | null) => DEV || isFilled(v);
 export function About() {
   const playing = usePlaying();
   const { identity } = content;
-  const attributes = content.attributes.filter((a) => keep(a.value));
+  // Fiche et attributs : en prod, les valeurs vides s'affichent « ??? » (joueur inconnu).
+  const attributes = content.attributes;
   const funStats = content.funStats.filter((s) => keep(s.value));
   const interests = content.interests.filter((i) => keep(i.name));
   const root = useRef<HTMLElement>(null);
@@ -117,7 +118,7 @@ export function About() {
     { label: 'Guilde', value: identity.guild, field: 'identity.guild' },
     { label: 'Zone', value: identity.city, field: 'identity.city' },
     { label: 'Statut', value: identity.status, field: 'identity.status' },
-  ].filter((row) => keep(row.value));
+  ];
 
   return (
     <section ref={root} id="about" className="section" aria-labelledby="about-title">
@@ -161,7 +162,7 @@ export function About() {
                   <div key={row.label} className="sheet-row">
                     <dt className="micro">{row.label}</dt>
                     <dd>
-                      <Placeholder value={row.value} field={row.field}>
+                      <Placeholder value={row.value} field={row.field} locked="???">
                         {(v) =>
                           row.label === 'Niveau' ? (
                             <span className="font-display text-accent">LVL {v}</span>
@@ -196,7 +197,7 @@ export function About() {
                             {String(a.value).padStart(2, '0')}
                           </span>
                         ) : (
-                          <Placeholder value={null} field={`attributes · ${a.name}`} />
+                          <Placeholder value={null} field={`attributes · ${a.name}`} locked="??" />
                         )}
                       </div>
                       <div className="attr__track" aria-hidden="true">

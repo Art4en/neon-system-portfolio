@@ -16,12 +16,18 @@ interface PlaceholderProps {
   block?: boolean;
   /** Rendu personnalisé quand la valeur est remplie. */
   children?: (value: string | number) => ReactNode;
+  /**
+   * En PROD, texte « verrouillé » affiché à la place d'un champ vide (ex : '???').
+   * Sans cette prop, le champ vide est simplement masqué.
+   */
+  locked?: string;
 }
 
 /**
  * Affiche une valeur du fichier de contenu.
  * - valeur remplie → rendue normalement ;
- * - "[À REMPLIR] …" ou null → cadre jaune ✏️ avec la consigne en DEV, rien du tout en PROD ;
+ * - "[À REMPLIR] …" ou null → cadre jaune ✏️ avec la consigne en DEV ; en PROD, rien
+ *   (ou un état « verrouillé » discret si `locked` est fourni) ;
  * - '' → rien (champ volontairement masqué).
  */
 export function Placeholder({
@@ -31,9 +37,10 @@ export function Placeholder({
   field,
   block,
   children,
+  locked,
 }: PlaceholderProps) {
   if (isTodo(value) || value === null) {
-    if (!DEV) return null;
+    if (!DEV) return locked ? <span className="locked">{locked}</span> : null;
     const hint = typeof value === 'string' ? todoHint(value) : 'nombre à renseigner';
     return (
       <span className={`ph-dev ${block ? 'ph-dev--block' : ''}`} data-placeholder="">

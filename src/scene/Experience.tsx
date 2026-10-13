@@ -1,5 +1,13 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
+import {
+  HalfFloatType,
+  WebGLRenderTarget,
+  type Camera,
+  type Object3D,
+  type Scene,
+  type WebGLRenderer,
+} from 'three';
 // Import ciblé : évite d'embarquer l'index complet de drei.
 import { PerformanceMonitor } from '@react-three/drei/core/PerformanceMonitor';
 import { gsap } from '../lib/gsap';
@@ -19,17 +27,54 @@ import { PostFX } from './effects/PostFX';
 import { COLORS } from './palette';
 
 /**
- * Un seul RAF : la scène n'a pas sa propre boucle (frameloop="never"),
- * elle est avancée depuis gsap.ticker, comme Lenis et ScrollTrigger.
- * L'onglet caché → requestAnimationFrame s'arrête → la scène est en pause.
- */
-/**
  * Tant que les shaders compilent en parallèle (KHR_parallel_shader_compile), on ne rend aucune
  * image : un rendu prématuré forcerait le navigateur à attendre la compilation sur le thread
  * principal (plusieurs centaines de ms de blocage).
  */
 const compileGate = { ready: false };
 
+/**
+ * Compile en arrière-plan (KHR_parallel_shader_compile) TOUS les shaders de la scène pour une
+ * cible de rendu donnée — y compris les objets encore invisibles (tunnel, plexus, portail…).
+ * Sans ça, three.js compile ces shaders au moment où l'objet apparaît : à-coup en plein scroll.
+ * `target` : null = rendu direct à l'écran ; une render target = rendu via le post-processing
+ * (les shaders y sont compilés avec un autre espace colorimétrique, donc en double).
+ */
+async function prewarm(
+  gl: WebGLRenderer,
+  scene: Scene,
+  camera: Camera,
+  target: WebGLRenderTarget | null,
+) {
+  const hidden: Object3D[] = [];
+  scene.traverse((o) => {
+    if (!o.visible) {
+      hidden.push(o);
+      o.visible = true;
+    }
+  });
+  const previous = gl.getRenderTarget();
+  let pending: Promise<unknown>;
+  try {
+    gl.setRenderTarget(target);
+    // compileAsync crée les programmes immédiatement puis attend leur fin de compilation.
+    pending = gl.compileAsync
+      ? gl.compileAsync(scene, camera)
+      : Promise.resolve(gl.compile(scene, camera));
+  } catch {
+    pending = Promise.resolve();
+  } finally {
+    gl.setRenderTarget(previous);
+    hidden.forEach((o) => (o.visible = false));
+  }
+  await pending.catch(() => undefined);
+}
+
+/**
+ * Un seul RAF : la scène n'a pas sa propre boucle (frameloop="never"),
+ * elle est avancée depuis gsap.ticker, comme Lenis et ScrollTrigger.
+ * L'onglet caché → requestAnimationFrame s'arrête → la scène est en pause.
+ */
 function TickerDriver() {
   const advance = useThree((s) => s.advance);
   useEffect(() => {
@@ -49,17 +94,11 @@ function ReadySignal() {
   const camera = useThree((s) => s.camera);
   useEffect(() => {
     let cancelled = false;
-    // compileAsync (si dispo) évite de bloquer le thread principal pendant la compilation.
-    const compile = gl.compileAsync
-      ? gl.compileAsync(scene, camera)
-      : Promise.resolve(gl.compile(scene, camera));
-    compile
-      .catch(() => undefined)
-      .then(() => {
-        if (cancelled) return;
-        compileGate.ready = true;
-        requestAnimationFrame(() => useAppStore.getState().setSceneReady());
-      });
+    void prewarm(gl, scene, camera, null).then(() => {
+      if (cancelled) return;
+      compileGate.ready = true;
+      requestAnimationFrame(() => useAppStore.getState().setSceneReady());
+    });
     return () => {
       cancelled = true;
     };
@@ -118,10 +157,31 @@ function usePostGate(): boolean {
   return sceneReady && (armed || playing);
 }
 
+/** Monte le post-processing une fois ses variantes de shaders préchauffées en arrière-plan. */
+function PostGate({ preset }: { preset: (typeof QUALITY_PRESETS)[keyof typeof QUALITY_PRESETS] }) {
+  const armed = usePostGate();
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+  const [warm, setWarm] = useState(false);
+  useEffect(() => {
+    if (!armed || warm || !preset.post) return;
+    let cancelled = false;
+    const rt = new WebGLRenderTarget(1, 1, { type: HalfFloatType });
+    void prewarm(gl, scene, camera, rt).then(() => {
+      rt.dispose();
+      if (!cancelled) setWarm(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [armed, warm, preset.post, gl, scene, camera]);
+  return preset.post && warm ? <PostFX preset={preset} /> : null;
+}
+
 export default function Experience() {
   const quality = useAppStore((s) => s.quality);
   const preset = QUALITY_PRESETS[quality];
-  const postReady = usePostGate();
 
   useEffect(() => {
     document.documentElement.dataset.quality = quality;
@@ -160,7 +220,7 @@ export default function Experience() {
         <Plexus count={preset.plexus} />
         <Portal />
         <Particles count={preset.particles} />
-        {preset.post && postReady && <PostFX preset={preset} />}
+        <PostGate preset={preset} />
       </Suspense>
       <ReadySignal />
     </Canvas>

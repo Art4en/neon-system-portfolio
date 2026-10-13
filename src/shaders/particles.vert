@@ -102,7 +102,7 @@ void main() {
   // Répulsion autour du curseur.
   vec3 d = p - uMouse;
   float dist = length(d);
-  p += (d / max(dist, 1e-3)) * smoothstep(2.8, 0.0, dist) * uMouseForce * 1.6;
+  p += (d / max(dist, 1e-3)) * (1.0 - smoothstep(0.0, 2.8, dist)) * uMouseForce * 1.6;
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
@@ -113,5 +113,5 @@ void main() {
 
   vColor = aRandom.y < 0.56 ? uColorA : aRandom.y < 0.8 ? uColorB : aRandom.y < 0.95 ? uColorC : uColorD;
   float twinkle = 0.65 + 0.35 * sin(t * 2.2 + aRandom.w * 40.0);
-  vAlpha = twinkle * smoothstep(0.4, 2.5, depth) * smoothstep(140.0, 30.0, depth);
+  vAlpha = twinkle * smoothstep(0.4, 2.5, depth) * (1.0 - smoothstep(30.0, 140.0, depth));
 }

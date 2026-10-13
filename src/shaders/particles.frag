@@ -10,9 +10,9 @@ void main() {
   uv.x *= 1.0 + uSpeed * 1.8;
   float d = length(uv);
   if (d > 0.5) discard;
-  float soft = smoothstep(0.5, 0.0, d);
+  float soft = 1.0 - smoothstep(0.0, 0.5, d);
   float glow = pow(soft, 2.0);
   float core = pow(soft, 9.0);
   vec3 col = vColor * glow * 1.5 + vec3(1.0) * core * 0.8;
-  gl_FragColor = vec4(col, glow * vAlpha * uOpacity);
+  gl_FragColor = max(vec4(col, glow * vAlpha * uOpacity), vec4(0.0));
 }

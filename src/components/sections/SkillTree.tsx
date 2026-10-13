@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { User } from 'lucide-react';
+import { Lock, User } from 'lucide-react';
 import { content, type Skill, type SkillCategoryId } from '../../content/portfolio';
 import { isFilled, isTodo } from '../../content/placeholder';
 import { handle, projectBySlug } from '../../lib/content';
@@ -81,7 +81,8 @@ export function SkillTree() {
   const DEV = import.meta.env.DEV;
   const { skillCategories } = content;
   // En prod, les compétences non remplies sont simplement ignorées.
-  const skills = useMemo(() => content.skills.filter((s) => DEV || isFilled(s.name)), [DEV]);
+  // En prod, une compétence pas encore remplie devient un nœud « verrouillé ».
+  const skills = content.skills;
   const cats = useMemo(
     () => skillCategories.map((c) => c.id).filter((id) => skills.some((s) => s.category === id)),
     [skillCategories, skills],
@@ -254,20 +255,23 @@ export function SkillTree() {
           const Icon =
             n.kind === 'category' ? CATEGORY_ICONS[n.category!] : n.kind === 'core' ? User : null;
           const todo = n.skill && isTodo(n.skill.name);
+          const locked = todo && !DEV;
           const label =
             n.kind === 'core'
               ? handle
               : n.kind === 'category'
                 ? skillCategories.find((c) => c.id === n.category)?.label
-                : todo
-                  ? '✏️ À remplir'
-                  : n.skill!.name;
+                : locked
+                  ? 'Locked'
+                  : todo
+                    ? '✏️ À remplir'
+                    : n.skill!.name;
           return (
             <button
               key={n.id}
               ref={(el) => void (nodeEls.current[n.id] = el)}
               type="button"
-              className={`tnode tnode--${n.kind} ${todo ? 'is-todo' : ''} ${hovered === n.id ? 'is-hover' : ''}`}
+              className={`tnode tnode--${n.kind} ${locked ? 'is-locked' : todo ? 'is-todo' : ''} ${hovered === n.id ? 'is-hover' : ''}`}
               onPointerEnter={() => {
                 setHovered(n.id);
                 sfx.hover();
@@ -288,6 +292,8 @@ export function SkillTree() {
                 <span className="tnode__inner hex">
                   {Icon ? (
                     <Icon size={n.kind === 'core' ? 30 : 24} strokeWidth={1.6} aria-hidden="true" />
+                  ) : locked ? (
+                    <Lock size={20} strokeWidth={1.6} aria-hidden="true" />
                   ) : (
                     <span className="tnode__lvl">
                       {n.skill && isFilled(n.skill.level) ? n.skill.level : '??'}
@@ -300,13 +306,15 @@ export function SkillTree() {
           );
         })}
 
-        {hoveredNode?.kind === 'skill' && hoveredNode.skill && (
-          <SkillTooltip
-            skill={hoveredNode.skill}
-            index={hoveredNode.index!}
-            pos={layout[hoveredNode.id]}
-          />
-        )}
+        {hoveredNode?.kind === 'skill' &&
+          hoveredNode.skill &&
+          (DEV || isFilled(hoveredNode.skill.name)) && (
+            <SkillTooltip
+              skill={hoveredNode.skill}
+              index={hoveredNode.index!}
+              pos={layout[hoveredNode.id]}
+            />
+          )}
       </div>
     </div>
   );

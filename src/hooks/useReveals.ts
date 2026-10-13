@@ -48,15 +48,14 @@ const VARIANTS: Record<string, Variant> = {
       ease: 'expo.out',
     });
   },
-  // Lettres serrées et floues qui se mettent au point.
+  // Titre étiré qui se resserre et se met au point (transform + opacité uniquement : fluide).
   focus: (tl, title) => {
     tl.from(title, {
-      letterSpacing: '0.6em',
-      filter: 'blur(18px)',
+      scaleX: 1.5,
       opacity: 0,
-      duration: 1.4,
+      transformOrigin: '50% 50%',
+      duration: 1.3,
       ease: 'expo.out',
-      clearProps: 'filter,letterSpacing',
     });
   },
   // Néon qui s'allume en clignotant.
@@ -130,7 +129,7 @@ export function useReveals() {
         const setters = titles.map((t) => gsap.quickSetter(t, 'skewY', 'deg'));
         let skew = 0;
         const tick = () => {
-          const target = clamp(runtime.velocity * 0.12, -6, 6);
+          const target = clamp(runtime.velocity * 0.06, -3, 3);
           skew += (target - skew) * 0.12;
           if (Math.abs(skew) < 0.01 && Math.abs(target) < 0.01) return;
           setters.forEach((set) => set(skew));

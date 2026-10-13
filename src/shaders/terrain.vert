@@ -20,7 +20,7 @@ void main() {
     float n = snoise(vec3(coord * 0.042, 0.0)) * 0.5 + 0.5;
     n += 0.45 * (snoise(vec3(coord * 0.11, 1.7)) * 0.5 + 0.5);
     // plus hautes à mesure qu'on s'éloigne du couloir central
-    h = ramp * pow(n, 1.7) * (5.0 + ax * 0.32);
+    h = ramp * pow(max(n, 0.0), 1.7) * (5.0 + ax * 0.32);
   }
   world.y += h;
   vHeight = h;

@@ -142,14 +142,8 @@
   align-items: center;
   gap: 1rem;
   padding: 0 var(--gutter);
-  background: rgb(5 6 10 / 0.8);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  background: rgb(5 6 10 / 0.92);
   border-bottom: 1px solid rgb(var(--accent-rgb) / 0.12);
-}
-html[data-quality='low'] .hud-top {
-  backdrop-filter: none;
-  background: rgb(5 6 10 / 0.94);
 }
 .hud-logo {
   display: inline-flex;
@@ -272,8 +266,10 @@ html[data-quality='low'] .hud-top {
 }
 .hud-btn__eq i {
   width: 2px;
-  height: 3px;
+  height: 12px;
   background: currentColor;
+  transform: scaleY(0.25);
+  transform-origin: bottom;
 }
 .hud-btn__eq.is-on i {
   animation: eq 0.9s ease-in-out infinite alternate;
@@ -286,10 +282,10 @@ html[data-quality='low'] .hud-top {
 }
 @keyframes eq {
   from {
-    height: 3px;
+    transform: scaleY(0.25);
   }
   to {
-    height: 12px;
+    transform: scaleY(1);
   }
 }
 
@@ -701,8 +697,7 @@ html[data-quality='low'] .hud-top {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgb(3 4 8 / 0.82);
-  backdrop-filter: blur(6px);
+  background: rgb(3 4 8 / 0.9);
   animation: fade-in 0.35s var(--ease-out) both;
 }
 .modal-content {
@@ -1449,9 +1444,8 @@ html[data-quality='low'] .hud-top {
   flex-direction: column;
   gap: 0.35rem;
   padding: 0.85rem 1rem;
-  background: rgb(5 6 10 / 0.55);
+  background: rgb(5 6 10 / 0.8);
   border: 1px solid rgb(var(--accent-rgb) / 0.22);
-  backdrop-filter: blur(6px);
 }
 .holo-stat__value {
   font-family: var(--font-display);
@@ -1615,6 +1609,8 @@ html[data-quality='low'] .hud-top {
   width: 100%;
   height: 100%;
   overflow: visible;
+  /* couche GPU dédiée : l'animation des lignes ne redessine pas les nœuds */
+  will-change: transform;
 }
 .edge line {
   vector-effect: non-scaling-stroke;
@@ -1630,8 +1626,8 @@ html[data-quality='low'] .hud-top {
   stroke-width: 2;
   stroke-dasharray: 6 14;
   opacity: 0;
-  filter: drop-shadow(0 0 4px var(--accent));
-  animation: flow 1.4s linear infinite;
+  /* steps() : ~14 mises à jour / s au lieu de 60+ — redessiner le SVG coûte cher. */
+  animation: flow 1.4s steps(20) infinite;
 }
 .edge[data-on] .edge__base {
   stroke: rgb(var(--accent-rgb) / 0.32);
@@ -1646,6 +1642,7 @@ html[data-quality='low'] .hud-top {
   opacity: 1 !important;
   stroke-width: 3;
   animation-duration: 0.5s;
+  animation-timing-function: linear;
 }
 .tnode {
   --s: 1;
@@ -1709,8 +1706,37 @@ html[data-quality='low'] .hud-top {
 }
 .tnode[data-unlocked] .tnode__hex {
   background: linear-gradient(135deg, var(--accent), var(--neon-violet));
-  filter: drop-shadow(0 0 10px rgb(var(--accent-rgb) / 0.55));
   animation: node-flash 0.7s var(--ease-out);
+}
+/* Halo derrière le nœud (dégradé radial : pas de filtre coûteux). */
+.tnode::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(var(--size) / 2);
+  z-index: -1;
+  width: calc(var(--size) * 1.7);
+  height: calc(var(--size) * 1.7);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.32), transparent 62%);
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  transition:
+    opacity 0.4s,
+    transform 0.4s var(--ease-out);
+  pointer-events: none;
+}
+.tnode[data-unlocked]::before {
+  opacity: 0.8;
+  transform: translate(-50%, -50%) scale(1);
+}
+.tnode.is-hover::before,
+.tnode:focus-visible::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.tnode.is-locked::before {
+  opacity: 0.25;
 }
 .tnode[data-unlocked] .tnode__inner {
   color: var(--accent);
@@ -1725,7 +1751,6 @@ html[data-quality='low'] .hud-top {
 .tnode.is-hover .tnode__hex,
 .tnode:focus-visible .tnode__hex {
   transform: scale(1.18);
-  filter: drop-shadow(0 0 18px rgb(var(--accent-rgb) / 0.9));
 }
 .tnode:focus-visible {
   outline: none;
@@ -1739,10 +1764,11 @@ html[data-quality='low'] .hud-top {
 }
 @keyframes node-flash {
   0% {
-    filter: brightness(3) drop-shadow(0 0 30px #fff);
+    opacity: 0.2;
     transform: scale(1.35);
   }
   100% {
+    opacity: 1;
     transform: scale(1);
   }
 }
@@ -2057,8 +2083,7 @@ html[data-quality='low'] .hud-top {
   max-width: 920px;
   margin-inline: auto;
   border: 1px solid rgb(var(--accent-rgb) / 0.35);
-  background: rgb(4 6 10 / 0.74);
-  backdrop-filter: blur(10px);
+  background: rgb(4 6 10 / 0.9);
   box-shadow:
     0 0 60px rgb(var(--accent-rgb) / 0.12),
     inset 0 0 80px rgb(0 0 0 / 0.6);
@@ -2630,4 +2655,51 @@ html[data-quality='low'] .term {
     min-width: 0;
     width: calc(100vw - 2rem);
   }
+}
+
+/* ─────────────── ÉTATS « VERROUILLÉS » (contenu pas encore rempli, en prod) ─────────────── */
+.locked {
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+.mission.is-locked {
+  cursor: default;
+}
+.mission.is-locked .mission__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgb(5 6 10 / 0.55) 0 10px,
+    rgb(5 6 10 / 0.35) 10px 20px
+  );
+}
+.mission__lock {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  color: var(--rarity);
+  filter: drop-shadow(0 0 10px var(--rarity));
+}
+.mission__lock .micro {
+  color: var(--text);
+}
+.tnode.is-locked .tnode__hex {
+  background: rgb(255 255 255 / 0.12);
+}
+.tnode.is-locked[data-unlocked] .tnode__hex {
+  background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.35), rgb(123 45 255 / 0.35));
+  filter: none;
+}
+.tnode.is-locked .tnode__inner {
+  color: var(--text-dim);
+}
+.tl-item.is-locked .tl-item__card {
+  opacity: 0.85;
 }

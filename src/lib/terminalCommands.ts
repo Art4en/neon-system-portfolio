@@ -120,6 +120,8 @@ export function runCommand(raw: string, ctx: CommandContext): Line[] {
         ? content.projects[n - 1]
         : content.projects.find((x) => x.slug === arg.toLowerCase());
       if (!p) return [o(`[ERROR] Mission introuvable : ${arg}`, 'err')];
+      if (!DEV && !isFilled(p.title))
+        return [o('🔒 Mission verrouillée : données classifiées.', 'sys')];
       st.setOpenProject(p.slug);
       st.unlock('curious');
       return [o(`> Chargement du briefing « ${isFilled(p.title) ? p.title : p.slug} »…`, 'ok')];

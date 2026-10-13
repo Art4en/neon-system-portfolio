@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { ExternalLink, Code2 } from 'lucide-react';
+import { ExternalLink, Code2, Lock } from 'lucide-react';
 import type { Project } from '../../content/portfolio';
 import { isFilled, isTodo } from '../../content/placeholder';
 import { projectImages, usableUrl } from '../../lib/content';
@@ -13,10 +13,52 @@ interface MissionCardProps {
   project: Project;
   index: number;
   onOpen: (slug: string) => void;
+  /** Mission pas encore remplie (en prod) : carte « verrouillée », sans aucun texte inventé. */
+  locked?: boolean;
 }
 
 /** Carte de mission : tilt 3D, reflet holo, bordure conique couleur de rareté. */
-export function MissionCard({ project: p, index, onOpen }: MissionCardProps) {
+export function MissionCard({ project: p, index, onOpen, locked }: MissionCardProps) {
+  if (locked) return <LockedMission project={p} index={index} />;
+  return <OpenMission project={p} index={index} onOpen={onOpen} />;
+}
+
+function LockedMission({ project: p, index }: { project: Project; index: number }) {
+  const num = String(index + 1).padStart(2, '0');
+  return (
+    <article
+      className="mission is-locked"
+      data-anim="mission"
+      aria-label={`Mission ${num} verrouillée`}
+    >
+      <HoloCard rarity={p.rarity} className="h-full">
+        <div className="mission__media">
+          <ProceduralCover seed={p.slug} rarity={p.rarity} className="w-full h-full" />
+          <div className="mission__lock" aria-hidden="true">
+            <Lock size={34} strokeWidth={1.6} />
+            <span className="micro">Classified</span>
+          </div>
+          <span className="mission__badge">◆ {RARITY_LABEL[p.rarity]}</span>
+          <span className="mission__num micro">MISSION #{num}</span>
+        </div>
+        <div className="mission__body">
+          <p className="micro text-neon-yellow">🔒 Locked</p>
+          <h3 className="mission__title">Mission verrouillée</h3>
+          <p className="mission__summary">
+            Données classifiées. Cette mission sera bientôt déclassifiée.
+          </p>
+          <div className="mission__actions mt-auto">
+            <span className="mission__link is-off">
+              <Lock size={14} aria-hidden="true" /> Accès refusé
+            </span>
+          </div>
+        </div>
+      </HoloCard>
+    </article>
+  );
+}
+
+function OpenMission({ project: p, index, onOpen }: MissionCardProps) {
   const { cover } = projectImages(p.slug);
   const demo = usableUrl(p.demoUrl);
   const code = usableUrl(p.codeUrl);

@@ -24,5 +24,5 @@ void main() {
   // halo, ramené à zéro avant le bord du plan (sinon on devine le carré)
   float halo = exp(-max(r - R, 0.0) * 7.0) * (1.0 - disc) * 0.55 * (1.0 - smoothstep(0.8, 0.98, r));
   vec3 c = col * disc * cut * 1.25 + mix(uBottom, uTop, 0.35) * halo;
-  gl_FragColor = vec4(c * uOpacity, 1.0);
+  gl_FragColor = vec4(max(c * uOpacity, vec3(0.0)), 1.0);
 }
