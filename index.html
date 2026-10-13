@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr" data-accent="cyan">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>%NEON_TITLE%</title>
+    <meta name="description" content="%NEON_DESCRIPTION%" />
+    <meta name="theme-color" content="#05060A" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="%NEON_URL%" />
+
+    <!-- Open Graph / Twitter : valeurs injectées depuis src/content/portfolio.ts (build/html-plugins.ts) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content="%NEON_TITLE%" />
+    <meta property="og:description" content="%NEON_DESCRIPTION%" />
+    <meta property="og:url" content="%NEON_URL%" />
+    <meta property="og:image" content="%NEON_OG_IMAGE%" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="%NEON_TITLE%" />
+    <meta name="twitter:description" content="%NEON_DESCRIPTION%" />
+    <meta name="twitter:image" content="%NEON_OG_IMAGE%" />
+
+    <script type="application/ld+json">%NEON_JSONLD%</script>
+  </head>
+  <body>
+    <noscript>
+      <div style="padding: 2rem; font-family: monospace; color: #e6edf3; background: #05060a">
+        [SYS.ERROR] JavaScript est désactivé — active-le pour lancer NEON//SYSTEM.
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

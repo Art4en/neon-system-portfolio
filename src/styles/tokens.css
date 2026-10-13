@@ -1,0 +1,50 @@
+/*
+ * Thème NEON//SYSTEM — tokens de couleur.
+ * Ces variables sont aussi lues par la scène 3D (src/scene/palette.ts) : change-les ici,
+ * pense à reporter la valeur dans palette.ts si tu veux que le fond 3D suive.
+ */
+:root {
+  --bg: #05060a;
+  --bg-elevated: #0b0e17;
+  --neon-cyan: #00f0ff;
+  --neon-magenta: #ff2bd6;
+  --neon-violet: #7b2dff;
+  --terminal-green: #39ff14;
+  --warning-yellow: #ffe600;
+  --text: #e6edf3;
+  --text-dim: #7d8590;
+
+  --rarity-common: #9da5b4;
+  --rarity-rare: #00a8ff;
+  --rarity-epic: #b44cff;
+  --rarity-legendary: #ffb020;
+
+  /* Couleur d'accent courante (commande `theme` du terminal, God Mode). */
+  --accent: var(--neon-cyan);
+  --accent-2: var(--neon-magenta);
+  --accent-rgb: 0 240 255;
+
+  --line: rgb(var(--accent-rgb) / 0.16);
+  --line-strong: rgb(var(--accent-rgb) / 0.45);
+  --panel: rgb(11 14 23 / 0.78);
+
+  --cut: 14px;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --hud-h: 64px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+:root[data-accent='magenta'] {
+  --accent: var(--neon-magenta);
+  --accent-2: var(--neon-cyan);
+  --accent-rgb: 255 43 214;
+}
+
+:root[data-accent='green'],
+:root[data-god='on'] {
+  --accent: var(--terminal-green);
+  --accent-2: var(--neon-cyan);
+  --accent-rgb: 57 255 20;
+}
