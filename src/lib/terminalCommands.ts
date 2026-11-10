@@ -94,7 +94,7 @@ export function runCommand(raw: string, ctx: CommandContext): Line[] {
         for (const s of list) {
           const name = isFilled(s.name) ? s.name : '✏️ à remplir';
           lines.push(
-            o(`  ${name.padEnd(18).slice(0, 18)} ${isFilled(s.level) ? bar(s.level) : '[ ?? ]'}`),
+            o(`  ${isFilled(s.level) ? name.padEnd(18).slice(0, 18) : name} ${isFilled(s.level) ? bar(s.level) : ''}`.trimEnd()),
           );
         }
       }

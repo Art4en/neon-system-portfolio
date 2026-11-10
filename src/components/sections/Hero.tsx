@@ -88,16 +88,17 @@ export function Hero() {
             <MagneticButton onClick={() => scrollToTarget('projects')} cursor="PLAY">
               <span aria-hidden="true">▶</span> Start game
             </MagneticButton>
-            <MagneticButton
-              className="btn-neon btn-neon--alt"
-              href={cvUrl ?? undefined}
-              download={cvUrl ? true : undefined}
-              disabled={!cvUrl}
-              cursor="SAVE"
-              title={cvUrl ? 'Télécharger mon CV (PDF)' : 'CV bientôt disponible'}
-            >
-              <span aria-hidden="true">⬇</span> {cvUrl ? 'Download CV' : 'CV · Bientôt disponible'}
-            </MagneticButton>
+            {cvUrl && (
+              <MagneticButton
+                className="btn-neon btn-neon--alt"
+                href={cvUrl}
+                download
+                cursor="SAVE"
+                title="Télécharger mon CV (PDF)"
+              >
+                <span aria-hidden="true">⬇</span> Download CV
+              </MagneticButton>
+            )}
           </div>
 
           <p className="hero__status" data-hero-in="">

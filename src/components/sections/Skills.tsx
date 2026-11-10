@@ -79,19 +79,19 @@ function SkillCards() {
                       <Placeholder value={s.name} field={`skills[${i}].name`} locked="🔒 Locked" />
                     </span>
                     <span className="font-display text-accent text-sm">
-                      <Placeholder value={s.level} field="level" locked="??">
+                      <Placeholder value={s.level} field="level">
                         {(v) => v}
                       </Placeholder>
                     </span>
                   </div>
-                  <div className="attr__track" aria-hidden="true">
-                    {isFilled(s.level) && (
+                  {isFilled(s.level) && (
+                    <div className="attr__track" aria-hidden="true">
                       <span
                         className="attr__bar"
                         style={{ transform: `scaleX(${s.level / 100})` }}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                   {isFilled(s.years) && (
                     <p className="micro mt-2">
                       {s.years} an{s.years > 1 ? 's' : ''} de pratique

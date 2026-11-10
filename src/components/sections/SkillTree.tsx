@@ -253,7 +253,13 @@ export function SkillTree() {
 
         {nodes.map((n) => {
           const Icon =
-            n.kind === 'category' ? CATEGORY_ICONS[n.category!] : n.kind === 'core' ? User : null;
+            n.kind === 'category'
+              ? CATEGORY_ICONS[n.category!]
+              : n.kind === 'core'
+                ? User
+                : n.skill && !isFilled(n.skill.level) && !isTodo(n.skill.name)
+                  ? CATEGORY_ICONS[n.skill.category]
+                  : null;
           const todo = n.skill && isTodo(n.skill.name);
           const locked = todo && !DEV;
           const label =
@@ -336,19 +342,23 @@ function SkillTooltip({ skill, index, pos }: { skill: Skill; index: number; pos:
       <p className="font-display text-base uppercase tracking-wider mb-3">
         <Placeholder value={skill.name} field={`skills[${index}].name`} />
       </p>
-      <div className="flex items-center justify-between micro mb-1">
-        <span>Niveau</span>
-        <span className="text-accent">
-          <Placeholder value={skill.level} field={`skills[${index}].level`}>
-            {(v) => `${v}/100`}
-          </Placeholder>
-        </span>
-      </div>
-      <div className="attr__track mb-3">
-        {isFilled(skill.level) && (
-          <span className="attr__bar" style={{ transform: `scaleX(${skill.level / 100})` }} />
-        )}
-      </div>
+      {(isFilled(skill.level) || import.meta.env.DEV) && (
+        <>
+          <div className="flex items-center justify-between micro mb-1">
+            <span>Niveau</span>
+            <span className="text-accent">
+              <Placeholder value={skill.level} field={`skills[${index}].level`}>
+                {(v) => `${v}/100`}
+              </Placeholder>
+            </span>
+          </div>
+          <div className="attr__track mb-3">
+            {isFilled(skill.level) && (
+              <span className="attr__bar" style={{ transform: `scaleX(${skill.level / 100})` }} />
+            )}
+          </div>
+        </>
+      )}
       {isFilled(skill.years) && (
         <p className="micro">
           Pratique :{' '}

@@ -182,7 +182,9 @@ export default function ProjectBriefing() {
               block
             />
           </div>
-          {blocks.map((b) => (
+          {blocks
+            .filter((b) => isFilled(b.value) || (import.meta.env.DEV && isTodo(b.value)))
+            .map((b) => (
             <div key={b.label} className="briefing__block">
               <p className="micro micro-accent mb-2">// {b.label.toUpperCase()}</p>
               <Placeholder value={b.value} as="p" className="prose-neon" field={b.field} block />

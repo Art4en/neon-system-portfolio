@@ -240,19 +240,15 @@ export const content: PortfolioContent = {
   },
 
   /* ── ATTRIBUTS RPG (valeurs sur 100) ──────────────────────────────────── */
-  attributes: [
-    { name: 'Créativité', value: null },
-    { name: 'Logique', value: null },
-    { name: 'Persévérance', value: null },
-    { name: "Esprit d'équipe", value: null },
-  ],
+  // Ajoute { name: 'Créativité', value: 80 } etc. pour afficher la fiche d'attributs.
+  attributes: [],
 
   /* ── STATS FUN ────────────────────────────────────────────────────────── */
+  // Ajoute { label: 'Jeu préféré', value: '…' } ou { label: 'Heures de code', value: 2000, suffix: '+' }.
   funStats: [
-    { label: 'Projets terminés', value: null }, // ex : 12
-    { label: 'Heures de code', value: null, suffix: '+' }, // ex : 2000
+    { label: 'Projets en ligne', value: 2 },
+    { label: 'Langues parlées', value: 3 },
     { label: 'Cafés', value: '∞' },
-    { label: 'Jeu préféré', value: '[À REMPLIR] Ton jeu préféré' },
   ],
 
   /* ── CENTRES D'INTÉRÊT (= inventaire) ─────────────────────────────────── */
@@ -309,8 +305,8 @@ export const content: PortfolioContent = {
       tech: ['HTML', 'CSS', 'JavaScript', 'Supabase'],
       summary: 'Site gaming avec un test de personnalité gamer, des mini-jeux de réflexes et des quiz de culture gaming.',
       context: "Site web avec un test de personnalité (20 questions), des mini-jeux (temps de réaction, aim trainer, Typing race) et des quiz sur League of Legends, Valorant, Fortnite, Apex Legends et de grands jeux d'histoire. Une version a aussi été menée en groupe sur GitHub.",
-      role: '[À REMPLIR] Ton rôle : ce que TU as fait concrètement.',
-      challenges: '[À REMPLIR] Les difficultés rencontrées et comment tu les as surmontées.',
+      role: '',
+      challenges: '',
       result: 'Site en ligne sur GitHub Pages, avec comptes et classements partagés via Supabase.',
       demoUrl: 'https://art4en.github.io/gaming-arena/',
       codeUrl: 'https://github.com/Art4en/gaming-arena',
@@ -325,9 +321,9 @@ export const content: PortfolioContent = {
       tech: ['JavaScript', 'Node.js', 'discord.js'],
       summary: 'Bot Discord en discord.js pour un serveur de communauté gaming.',
       context: "Projet perso : un serveur Discord pour une communauté gaming, avec son bot, installé sur le serveur d'un ami.",
-      role: '[À REMPLIR] Ton rôle : ce que TU as fait concrètement.',
-      challenges: '[À REMPLIR] Les difficultés rencontrées et comment tu les as surmontées.',
-      result: '[À REMPLIR] Le résultat : ce que ça a donné, ce que tu en as appris.',
+      role: '',
+      challenges: '',
+      result: '',
       demoUrl: '',
       codeUrl: '',
       rarity: 'epic',
@@ -341,9 +337,9 @@ export const content: PortfolioContent = {
       tech: ['Luau', 'Roblox Studio', 'Rojo'],
       summary: 'Jeu Roblox à l’ambiance dark fantasy inspirée de Dark Souls, avec un dragon en boss final.',
       context: 'Projet à deux avec un ami, sur environ un mois.',
-      role: '[À REMPLIR] Ton rôle : ce que TU as fait concrètement.',
-      challenges: '[À REMPLIR] Les difficultés rencontrées et comment tu les as surmontées.',
-      result: '[À REMPLIR] Le résultat : ce que ça a donné, ce que tu en as appris.',
+      role: '',
+      challenges: '',
+      result: '',
       demoUrl: '',
       codeUrl: '',
       rarity: 'rare',
